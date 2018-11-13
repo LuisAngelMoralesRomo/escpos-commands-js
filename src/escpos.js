@@ -1,4 +1,4 @@
-var MutableBuffer = require('mutable-buffer'),
+var { MutableBuffer } = require('mutable-buffer'),
     CMD = require('./commands');
 
 class Escpos {
