@@ -1,4 +1,4 @@
-module.exports = {
+export const CMD = {
     LF: '\x0a',
     ESC: '\x1b',
     FS: '\x1c',
