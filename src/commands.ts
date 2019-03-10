@@ -1,152 +1,145 @@
-export const CMD = {
-    LF: '\x0a',
-    ESC: '\x1b',
-    FS: '\x1c',
-    GS: '\x1d',
-    US: '\x1f',
-    FF: '\x0c',
-    DLE: '\x10',
-    DC1: '\x11',
-    DC4: '\x14',
-    EOT: '\x04',
-    NUL: '\x00',
-    EOL: '\n',
-    FEED_CONTROL_SEQUENCES: {
-        CTL_LF: '\x0a', // Print and line feed
-        CTL_FF: '\x0c', // Form feed
-        CTL_CR: '\x0d', // Carriage return
-        CTL_HT: '\x09', // Horizontal tab
-        CTL_VT: '\x0b', // Vertical tab
-    },
-    LINE_SPACING: {
-        LS_DEFAULT: '\x1b\x32',
-        LS_SET: '\x1b\x33'
-    },
-    HARDWARE: {
-        HW_INIT: '\x1b\x40', // Clear data in buffer and reset modes
-        HW_SELECT: '\x1b\x3d\x01', // Printer select
-        HW_RESET: '\x1b\x3f\x0a\x00', // Reset printer hardware
-    },
-    CASH_DRAWER: {
-        CD_KICK_2: '\x1b\x70\x00', // Sends a pulse to pin 2 []
-        CD_KICK_5: '\x1b\x70\x01', // Sends a pulse to pin 5 []
-    },
-    MARGINS: {
-        BOTTOM: '\x1b\x4f', // Fix bottom size
-        LEFT: '\x1b\x6c', // Fix left size
-        RIGHT: '\x1b\x51', // Fix right size
-    },
-    PAPER: {
-        PAPER_FULL_CUT: '\x1d\x56\x00', // Full cut paper
-        PAPER_PART_CUT: '\x1d\x56\x01', // Partial cut paper
-        PAPER_CUT_A: '\x1d\x56\x41', // Partial cut paper
-        PAPER_CUT_B: '\x1d\x56\x42', // Partial cut paper
-    },
-    TEXT_FORMAT: {
-        TXT_NORMAL: '\x1b\x21\x00', // Normal text
-        TXT_2HEIGHT: '\x1b\x21\x10', // Double height text
-        TXT_2WIDTH: '\x1b\x21\x20', // Double width text
-        TXT_4SQUARE: '\x1b\x21\x30', // Double width & height text
+export enum CMD {
+  LF = '\x0A',
+  ESC = '\x1B',
+  FS = '\x1C',
+  GS = '\x1D',
+  US = '\x1F',
+  FF = '\x0C',
+  DLE = '\x10',
+  DC1 = '\x11',
+  DC4 = '\x14',
+  EOT = '\x04',
+  NUL = '\x00',
+  EOL = '\n',
+}
 
-        TXT_CUSTOM_SIZE: function(width, height) { // other sizes
-            var widthDec = (width - 1) * 16;
-            var heightDec = height - 1;
-            var sizeDec = widthDec + heightDec;
-            return '\x1d\x21' + String.fromCharCode(sizeDec);
-        },
+export enum FEED_CONTROL_SEQUENCES {
+  LF = '\x0A', // Print and line feed
+  FF = '\x0C', // Form feed
+  CR = '\x0D', // Carriage return
+  HT = '\x09', // Horizontal tab
+  VT = '\x0B', // Vertical tab
+}
 
-        TXT_HEIGHT: {
-            1: '\x00',
-            2: '\x01',
-            3: '\x02',
-            4: '\x03',
-            5: '\x04',
-            6: '\x05',
-            7: '\x06',
-            8: '\x07'
-        },
-        TXT_WIDTH: {
-            1: '\x00',
-            2: '\x10',
-            3: '\x20',
-            4: '\x30',
-            5: '\x40',
-            6: '\x50',
-            7: '\x60',
-            8: '\x70'
-        },
+export enum LINE_SPACING {
+  DEFAULT = '\x1B\x32',
+  SET = '\x1B\x33'
+}
 
-        TXT_UNDERL_OFF: '\x1b\x2d\x00', // Underline font OFF
-        TXT_UNDERL_ON: '\x1b\x2d\x01', // Underline font 1-dot ON
-        TXT_UNDERL2_ON: '\x1b\x2d\x02', // Underline font 2-dot ON
-        TXT_BOLD_OFF: '\x1b\x45\x00', // Bold font OFF
-        TXT_BOLD_ON: '\x1b\x45\x01', // Bold font ON
-        TXT_ITALIC_OFF: '\x1b\x35', // Italic font ON
-        TXT_ITALIC_ON: '\x1b\x34', // Italic font ON
+export enum HARDWARE {
+  INIT = '\x1B\x40', // Clear data in buffer and reset modes
+  SELECT = '\x1B\x3D\x01', // Printer select
+  RESET = '\x1B\x3F\x0A\x00', // Reset printer hardware
+}
 
-        TXT_FONT_A: '\x1b\x4d\x00', // Font type A
-        TXT_FONT_B: '\x1b\x4d\x01', // Font type B
-        TXT_FONT_C: '\x1b\x4d\x02', // Font type C
+export enum CASH_DRAWER {
+  KICK_2 = '\x1B\x70\x00', // Sends a pulse to pin 2 []
+  KICK_5 = '\x1B\x70\x01', // Sends a pulse to pin 5 []
+}
 
-        TXT_ALIGN_LT: '\x1b\x61\x00', // Left justification
-        TXT_ALIGN_CT: '\x1b\x61\x01', // Centering
-        TXT_ALIGN_RT: '\x1b\x61\x02', // Right justification
-    },
-    BARCODE_FORMAT: {
-        BARCODE_TXT_OFF: '\x1d\x48\x00', // HRI barcode chars OFF
-        BARCODE_TXT_ABV: '\x1d\x48\x01', // HRI barcode chars above
-        BARCODE_TXT_BLW: '\x1d\x48\x02', // HRI barcode chars below
-        BARCODE_TXT_BTH: '\x1d\x48\x03', // HRI barcode chars both above and below
+export enum MARGINS {
+  BOTTOM = '\x1B\x4F', // Fix bottom size
+  LEFT = '\x1B\x6C', // Fix left size
+  RIGHT = '\x1B\x51', // Fix right size
+}
 
-        BARCODE_FONT_A: '\x1d\x66\x00', // Font type A for HRI barcode chars
-        BARCODE_FONT_B: '\x1d\x66\x01', // Font type B for HRI barcode chars
 
-        BARCODE_HEIGHT: function(height) { // Barcode Height [1-255]
-            return '\x1d\x68' + String.fromCharCode(height);
-        },
-        // Barcode Width  [2-6]
-        BARCODE_WIDTH: {
-            1: '\x1d\x77\x02',
-            2: '\x1d\x77\x03',
-            3: '\x1d\x77\x04',
-            4: '\x1d\x77\x05',
-            5: '\x1d\x77\x06',
-        },
-        BARCODE_HEIGHT_DEFAULT: '\x1d\x68\x64', // Barcode height default:100
-        BARCODE_WIDTH_DEFAULT: '\x1d\x77\x01', // Barcode width default:1
+export enum PAPER_CUT {
+  FULL = '\x1D\x56\x00', // Full cut paper
+  PARTIAL = '\x1D\x56\x01', // Partial cut paper
+  A = '\x1D\x56\x41', // Partial cut paper
+  B = '\x1D\x56\x42', // Partial cut paper
+}
 
-        BARCODE_UPC_A: '\x1d\x6b\x00', // Barcode type UPC-A
-        BARCODE_UPC_E: '\x1d\x6b\x01', // Barcode type UPC-E
-        BARCODE_EAN13: '\x1d\x6b\x02', // Barcode type EAN13
-        BARCODE_EAN8: '\x1d\x6b\x03', // Barcode type EAN8
-        BARCODE_CODE39: '\x1d\x6b\x04', // Barcode type CODE39
-        BARCODE_ITF: '\x1d\x6b\x05', // Barcode type ITF
-        BARCODE_NW7: '\x1d\x6b\x06', // Barcode type NW7
-        BARCODE_CODE93: '\x1d\x6b\x48', // Barcode type CODE93
-        BARCODE_CODE128: '\x1d\x6b\x49', // Barcode type CODE128
-    },
-    CODE2D_FORMAT: {
-        TYPE_PDF417: '\x1b\x5a\x00',
-        TYPE_DATAMATRIX: '\x1b\x5a\x01',
-        TYPE_QR: '\x1b\x5a\x02',
-        CODE2D: '\x1b\x5a',
-    },
-    IMAGE_FORMAT: {
-        S_RASTER_N: '\x1d\x76\x30\x00', // Set raster image normal size
-        S_RASTER_2W: '\x1d\x76\x30\x01', // Set raster image double width
-        S_RASTER_2H: '\x1d\x76\x30\x02', // Set raster image double height
-        S_RASTER_Q: '\x1d\x76\x30\x03', // Set raster image quadruple
-    },
-    BITMAP_FORMAT: {
-        BITMAP_S8: '\x1b\x2a\x00',
-        BITMAP_D8: '\x1b\x2a\x01',
-        BITMAP_S24: '\x1b\x2a\x20',
-        BITMAP_D24: '\x1b\x2a\x21'
-    },
-    GSV0_FORMAT: {
-        GSV0_NORMAL: '\x1d\x76\x30\x00',
-        GSV0_DW: '\x1d\x76\x30\x01',
-        GSV0_DH: '\x1d\x76\x30\x02',
-        GSV0_DWDH: '\x1d\x76\x30\x03'
-    }
-};
+export enum TEXT_SIZE {
+  NORMAL = '\x1B\x21\x00',
+  DOUBLE_HEIGHT = '\x1B\x21\x10',
+  DOUBLE_WIDTH = '\x1B\x21\x20',
+  DOUBLE_WIDTH_HEIGHT = '\x1B\x21\x30',
+}
+
+export enum TEXT_ALIGN {
+  LEFT = '\x1B\x61\x00',
+  CENTER = '\x1B\x61\x01',
+  RIGHT = '\x1B\x61\x02',
+}
+
+export enum TEXT_STYLE {
+  SET_FONT = '\x1B\x4D',
+  SET_BOLD = '\x1B\x45',
+  SET_UNDERLINE = '\x1B\x2D',
+
+  UNDERL_OFF = '\x1B\x2D\x00', // Underline font OFF
+  UNDERL_ON = '\x1B\x2D\x01', // Underline font 1-dot ON
+  UNDERL2_ON = '\x1B\x2D\x02', // Underline font 2-dot ON
+  BOLD_OFF = '\x1B\x45\x00', // Bold font OFF
+  BOLD_ON = '\x1B\x45\x01', // Bold font ON
+  ITALIC_OFF = '\x1B\x35', // Italic font ON
+  ITALIC_ON = '\x1B\x34', // Italic font ON
+}
+
+export enum BARCODE {
+  SET_FORMAT = '\x1D\x6B',
+  SET_HEIGHT = '\x1D\x68',
+  SET_WIDTH = '\x1D\x77',
+  SET_FONT = '\x1D\x66',
+  SET_HRI = '\x1D\x48',
+}
+
+export enum BARCODE_FORMAT {
+  UPC_A = '\x00',
+  UPC_E = '\x01',
+  EAN13 = '\x02',
+  EAN8 = '\x03',
+  CODE39 = '\x04',
+  ITF = '\x05',
+  NW7 = '\x06',
+  CODE93 = '\x48',
+  CODE128 = '\x49',
+}
+
+export enum BARCODE_HRI {
+  OFF = '\x00',
+  ABOVE = '\x01',
+  BELOW = '\x02',
+  BOTH = '\x03',
+}
+
+export enum FONT {
+  A = '\x00', // \x30
+  B = '\x01', // \x31
+  C = '\x02', // \x32
+  D = '\x03', // \x33
+  E = '\x04', // \x34
+  A_SPECIAL = '\x61',
+  B_SPECIAL = '\x62',
+}
+
+
+export enum IMAGE_FORMAT {
+  S_RASTER_N = '\x1D\x76\x30\x00', // Set raster image normal size
+  S_RASTER_2W = '\x1D\x76\x30\x01', // Set raster image double width
+  S_RASTER_2H = '\x1D\x76\x30\x02', // Set raster image double height
+  S_RASTER_Q = '\x1D\x76\x30\x03', // Set raster image quadruple
+}
+
+export enum CODE2D_FORMAT {
+  TYPE_PDF417 = '\x1B\x5A\x00',
+  TYPE_DATAMATRIX = '\x1B\x5A\x01',
+  TYPE_QR = '\x1B\x5A\x02',
+  CODE2D = '\x1B\x5A',
+}
+
+export enum BITMAP_FORMAT {
+  BITMAP_S8 = '\x1B\x2A\x00',
+  BITMAP_D8 = '\x1B\x2A\x01',
+  BITMAP_S24 = '\x1B\x2A\x20',
+  BITMAP_D24 = '\x1B\x2A\x21'
+}
+
+export enum GSV0_FORMAT {
+  NORMAL = '\x1D\x76\x30\x00',
+  DOUBLE_HEIGHT = '\x1D\x76\x30\x01',
+  DOUBLE_WIDTH = '\x1D\x76\x30\x02',
+  DOUBLE_WIDTH_HEIGHT = '\x1D\x76\x30\x03'
+}

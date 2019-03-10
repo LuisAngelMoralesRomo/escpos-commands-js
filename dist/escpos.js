@@ -1,155 +1,138 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var mutable_buffer_1 = require("./mutable-buffer");
+var buffer_1 = require("buffer");
 var commands_1 = require("./commands");
+var mutable_buffer_1 = require("./mutable-buffer");
 var Escpos = /** @class */ (function () {
     function Escpos() {
         this.buffer = new mutable_buffer_1.MutableBuffer();
     }
     Escpos.prototype.init = function () {
-        this.buffer.write(commands_1.CMD.HARDWARE.HW_INIT);
+        this.buffer.write(commands_1.HARDWARE.INIT);
         return this;
     };
-    Escpos.prototype.boldOn = function () {
-        this.buffer.write(commands_1.CMD.TEXT_FORMAT.TXT_BOLD_ON);
+    Escpos.prototype.hardware = function (cmd) {
+        if (cmd) {
+            this.buffer.write(cmd);
+        }
         return this;
     };
-    Escpos.prototype.boldOff = function () {
-        this.buffer.write(commands_1.CMD.TEXT_FORMAT.TXT_BOLD_OFF);
+    Escpos.prototype.control = function (ctrl) {
+        if (ctrl) {
+            this.buffer.write(ctrl);
+        }
         return this;
     };
-    Escpos.prototype.marginBottom = function (size) {
-        this.buffer.write(commands_1.CMD.MARGINS.BOTTOM);
+    Escpos.prototype.text = function (content) {
+        this.buffer.write(content);
+        return this;
+    };
+    Escpos.prototype.font = function (font) {
+        this.buffer.write(commands_1.TEXT_STYLE.SET_FONT);
+        this.buffer.write(font);
+        return this;
+    };
+    Escpos.prototype.bold = function (set) {
+        this.buffer.write(commands_1.TEXT_STYLE.SET_BOLD);
+        this.buffer.writeUInt8(Number(!!set));
+        return this;
+    };
+    Escpos.prototype.margin = function (side, size) {
+        this.buffer.write(side);
         this.buffer.writeUInt8(size);
-        return this;
-    };
-    Escpos.prototype.marginLeft = function (size) {
-        this.buffer.write(commands_1.CMD.MARGINS.LEFT);
-        this.buffer.writeUInt8(size);
-        return this;
-    };
-    Escpos.prototype.marginRight = function (size) {
-        this.buffer.write(commands_1.CMD.MARGINS.RIGHT);
-        this.buffer.writeUInt8(size);
-        return this;
-    };
-    Escpos.prototype.text = function (content, encoding) {
-        this.buffer.write(content, encoding);
         return this;
     };
     Escpos.prototype.feed = function (lines) {
         if (lines === void 0) { lines = 1; }
-        if (lines <= 0) {
-            return this;
-        }
         lines = Math.floor(lines);
-        this.buffer.write(new Array(lines).fill(commands_1.CMD.EOL).join(''));
+        if (lines > 0) {
+            this.buffer.write(new Array(lines).fill(commands_1.CMD.EOL).join(''));
+        }
         return this;
     };
-    Escpos.prototype.control = function (ctrl) {
-        this.buffer.write(commands_1.CMD.FEED_CONTROL_SEQUENCES["CTL_" + ctrl]);
+    Escpos.prototype.cut = function (mode) {
+        if (mode) {
+            this.buffer.write(mode);
+        }
         return this;
     };
     Escpos.prototype.align = function (align) {
-        this.buffer.write(commands_1.CMD.TEXT_FORMAT["TXT_ALIGN_" + align]);
+        this.buffer.write(align);
         return this;
     };
-    Escpos.prototype.font = function (family) {
-        this.buffer.write(commands_1.CMD.TEXT_FORMAT["TXT_FONT_" + family]);
+    Escpos.prototype.size = function (width, height) {
+        if (width && height) {
+            width = Math.min(Math.max(Math.floor(width), 1), 8);
+            height = Math.min(Math.max(Math.floor(height), 1), 8);
+            this.buffer.writeUInt8(((width - 1) << 4) + (height - 1));
+        }
         return this;
+        // if (2 >= width && 2 >= height) {
+        //   this.buffer.write(CMD.TEXT_FORMAT.TXT_NORMAL);
+        //   if (2 == width && 2 == height) {
+        //     this.buffer.write(CMD.TEXT_FORMAT.TXT_4SQUARE);
+        //   } else if (1 == width && 2 == height) {
+        //     this.buffer.write(CMD.TEXT_FORMAT.TXT_2HEIGHT);
+        //   } else if (2 == width && 1 == height) {
+        //     this.buffer.write(CMD.TEXT_FORMAT.TXT_2WIDTH);
+        //   }
+        // }
     };
-    // public size(width: number, height: number): Escpos {
-    //   if (2 >= width && 2 >= height) {
-    //     this.buffer.write(CMD.TEXT_FORMAT.TXT_NORMAL);
-    //     if (2 == width && 2 == height) {
-    //       this.buffer.write(CMD.TEXT_FORMAT.TXT_4SQUARE);
-    //     } else if (1 == width && 2 == height) {
-    //       this.buffer.write(CMD.TEXT_FORMAT.TXT_2HEIGHT);
-    //     } else if (2 == width && 1 == height) {
-    //       this.buffer.write(CMD.TEXT_FORMAT.TXT_2WIDTH);
-    //     }
-    //   } else {
-    //     this.buffer.write(CMD.TEXT_FORMAT.TXT_CUSTOM_SIZE(width, height));
-    //   }
-    //   return this;
-    // }
     Escpos.prototype.lineSpace = function (space) {
-        if (space === undefined) {
-            this.buffer.write(commands_1.CMD.LINE_SPACING.LS_DEFAULT);
+        if (space === undefined || space < 0 || space > 255) {
+            this.buffer.write(commands_1.LINE_SPACING.DEFAULT);
         }
         else {
             space = Math.floor(space);
-            if (space < 0) {
-                space = 0;
-            }
-            this.buffer.write(commands_1.CMD.LINE_SPACING.LS_SET);
+            this.buffer.write(commands_1.LINE_SPACING.SET);
             this.buffer.writeUInt8(space);
         }
         return this;
     };
-    // barcode(code, type = 'CODE128', width = 3, height = 100, position = 'BTH', font = 'B') {
-    //   let convertCode = String(code);
-    //   if (typeof type === 'undefined' || type === null) {
-    //     throw new TypeError('barcode type is required');
-    //   }
-    //   if (type === 'EAN13' && convertCode.length != 12) {
-    //     throw new Error('EAN13 Barcode type requires code length 12');
-    //   }
-    //   if (type === 'EAN8' && convertCode.length != 7) {
-    //     throw new Error('EAN8 Barcode type requires code length 7');
-    //   }
-    //   if (width >= 2 || width <= 6) {
-    //     this.buffer.write(CMD.BARCODE_FORMAT.BARCODE_WIDTH[width]);
-    //   } else {
-    //     this.buffer.write(CMD.BARCODE_FORMAT.BARCODE_WIDTH_DEFAULT);
-    //   }
-    //   if (height >= 1 || height <= 255) {
-    //     this.buffer.write(CMD.BARCODE_FORMAT.BARCODE_HEIGHT(height));
-    //   } else {
-    //     this.buffer.write(CMD.BARCODE_FORMAT.BARCODE_HEIGHT_DEFAULT);
-    //   }
-    //   this.buffer.write(CMD.BARCODE_FORMAT[
-    //     'BARCODE_FONT_' + (font || 'B').toUpperCase()
-    //   ]);
-    //   this.buffer.write(CMD.BARCODE_FORMAT[
-    //     'BARCODE_TXT_' + (position || 'BTH').toUpperCase()
-    //   ]);
-    //   this.buffer.write(CMD.BARCODE_FORMAT[
-    //     'BARCODE_' + ((type || 'EAN13').replace('-', '_').toUpperCase())
-    //   ]);
-    //   let codeBytes = code.split('').map(s => s.charCodeAt(0));
-    //   this.buffer.write(codeBytes.length);
-    //   this.buffer.write(codeBytes);
-    //   this.buffer.write('\x00');
-    //   return this;
-    // }
-    Escpos.prototype.qrcode = function (code, version, level, size) {
-        if (version === void 0) { version = 3; }
-        if (level === void 0) { level = 3; }
-        if (size === void 0) { size = 8; }
-        this.buffer.write(commands_1.CMD.CODE2D_FORMAT.CODE2D);
-        this.buffer.writeUInt8(version);
-        this.buffer.writeUInt8(level);
-        this.buffer.writeUInt8(size);
-        this.buffer.writeUInt16LE(code.length);
-        this.buffer.write(code);
+    Escpos.prototype.barcode = function (code, type, width, height, hri, font) {
+        this.buffer.write(commands_1.BARCODE.SET_WIDTH);
+        if (typeof width !== 'number' || width < 2 || width > 6) {
+            this.buffer.writeUInt8(2);
+        }
+        else {
+            width = Math.floor(width);
+            this.buffer.writeUInt8(width);
+        }
+        this.buffer.write(commands_1.BARCODE.SET_HEIGHT);
+        if (typeof height !== 'number' || height < 1 || height > 255) {
+            this.buffer.writeUInt8(100);
+        }
+        else {
+            height = Math.floor(height);
+            this.buffer.writeUInt8(height);
+        }
+        this.buffer.write(commands_1.BARCODE.SET_FONT);
+        this.buffer.write(font || commands_1.FONT.A);
+        this.buffer.write(commands_1.BARCODE.SET_HRI);
+        this.buffer.write(hri || commands_1.BARCODE_HRI.OFF);
+        this.buffer.write(commands_1.BARCODE.SET_FONT);
+        this.buffer.write(type || commands_1.BARCODE_FORMAT.EAN13);
+        code = String(code);
+        this.buffer.write(code.length);
+        this.buffer.write(buffer_1.Buffer.from(code, 'ascii'));
+        this.buffer.write('\x00');
         return this;
     };
-    // hardware(hw: 'HW_INIT' | 'HW_SELECT' | 'HW_RESET') {
-    //   this.buffer.write(CMD.HARDWARE[`HW_${hw}`]);
-    //   return this.flush();
+    // qrcode(code: string, version: number = 3, level: number = 3, size: number = 8): Escpos {
+    //   this.buffer.write(CMD.CODE2D_FORMAT.CODE2D);
+    //   this.buffer.writeUInt8(version);
+    //   this.buffer.writeUInt8(level);
+    //   this.buffer.writeUInt8(size);
+    //   this.buffer.writeUInt16LE(code.length);
+    //   this.buffer.write(code);
+    //   return this;
     // }
-    // public cashdraw(pin: 2 | 5): Escpos {
-    //   if (!pin) {
-    //     return this;
-    //   }
-    //   this.buffer.write(CMD.CASH_DRAWER[`CD_KICK_${pin}`]);
-    //   return this.flush();
-    // }
-    Escpos.prototype.cut = function (part, feed) {
-        if (feed === void 0) { feed = 3; }
-        this.feed(feed);
-        this.buffer.write(commands_1.CMD.PAPER[part ? 'PAPER_PART_CUT' : 'PAPER_FULL_CUT']);
+    Escpos.prototype.pulse = function (pin, timeOn, timeOff) {
+        if (pin) {
+            this.buffer.write(pin);
+            this.buffer.writeUInt8(timeOn ? Math.min(Math.max(Math.floor(timeOn / 2), 255), 0) : 255);
+            this.buffer.writeUInt8(timeOff ? Math.min(Math.max(Math.floor(timeOff / 2), 255), 0) : 255);
+        }
         return this;
     };
     Escpos.prototype.flush = function () {

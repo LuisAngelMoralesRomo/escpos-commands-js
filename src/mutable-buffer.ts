@@ -1,6 +1,7 @@
 import { Buffer } from "buffer";
 
 export class MutableBuffer {
+  
   protected _initialSize: number;
   protected _blockSize: number;
   protected _size: number;
