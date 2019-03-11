@@ -12,12 +12,25 @@ export declare enum CMD {
     NUL = "\0",
     EOL = "\n"
 }
-export declare enum FEED_CONTROL_SEQUENCES {
+export declare enum CONTROL_CMD {
     LF = "\n",
     FF = "\f",
     CR = "\r",
     HT = "\t",
     VT = "\v"
+}
+export declare enum TEXT_CMD {
+    SET_FORMAT = "\u001B!",
+    SET_SIZE = "\u001D!",
+    SET_UNDERLINE = "\u001B-",
+    SET_FONT = "\u001BM",
+    SET_BOLD = "\u001BE",
+    SET_ALIGN = "\u001Ba"
+}
+export declare enum ALIGN {
+    LEFT = "\0",
+    CENTER = "\u0001",
+    RIGHT = "\u0002"
 }
 export declare enum LINE_SPACING {
     DEFAULT = "\u001B2",
@@ -40,29 +53,14 @@ export declare enum MARGINS {
 export declare enum PAPER_CUT {
     FULL = "\u001DV\0",
     PARTIAL = "\u001DV\u0001",
-    A = "\u001DVA",
-    B = "\u001DVB"
-}
-export declare enum TEXT_SIZE {
-    NORMAL = "\u001B!\0",
-    DOUBLE_HEIGHT = "\u001B!\u0010",
-    DOUBLE_WIDTH = "\u001B! ",
-    DOUBLE_WIDTH_HEIGHT = "\u001B!0"
-}
-export declare enum TEXT_ALIGN {
-    LEFT = "\u001Ba\0",
-    CENTER = "\u001Ba\u0001",
-    RIGHT = "\u001Ba\u0002"
+    FULL_FEED = "\u001DVA\0",
+    PARTIAL_FEED = "\u001DVB\0",
+    FULL_MOVE = "\u001DVa\0",
+    PARTIAL_MOVE = "\u001DVb\0",
+    FULL_RETURN = "\u001DVg\0",
+    PARTIAL_RETURN = "\u001DVh\0"
 }
 export declare enum TEXT_STYLE {
-    SET_FONT = "\u001BM",
-    SET_BOLD = "\u001BE",
-    SET_UNDERLINE = "\u001B-",
-    UNDERL_OFF = "\u001B-\0",
-    UNDERL_ON = "\u001B-\u0001",
-    UNDERL2_ON = "\u001B-\u0002",
-    BOLD_OFF = "\u001BE\0",
-    BOLD_ON = "\u001BE\u0001",
     ITALIC_OFF = "\u001B5",
     ITALIC_ON = "\u001B4"
 }
@@ -81,8 +79,20 @@ export declare enum BARCODE_FORMAT {
     CODE39 = "\u0004",
     ITF = "\u0005",
     NW7 = "\u0006",
+    B_UPC_A = "A",
+    B_UPC_E = "B",
+    B_EAN13 = "C",
+    B_EAN8 = "D",
+    B_CODE39 = "E",
+    B_ITF = "F",
+    CODABAR = "G",
     CODE93 = "H",
-    CODE128 = "I"
+    CODE128 = "I",
+    GS1_128 = "J",
+    GS1_DATABAR_OMNIDIRECTIONAL = "K",
+    GS1_DATABAR_TRUNCATED = "L",
+    GS1_DATABAR_LIMITED = "M",
+    GS1_DATABAR_EXPANDED = "N"
 }
 export declare enum BARCODE_HRI {
     OFF = "\0",
@@ -99,27 +109,22 @@ export declare enum FONT {
     A_SPECIAL = "a",
     B_SPECIAL = "b"
 }
-export declare enum IMAGE_FORMAT {
-    S_RASTER_N = "\u001Dv0\0",
-    S_RASTER_2W = "\u001Dv0\u0001",
-    S_RASTER_2H = "\u001Dv0\u0002",
-    S_RASTER_Q = "\u001Dv0\u0003"
+export declare enum QR {
+    SET_MODEL = "\u001D(k\u0004\x001A",
+    SET_SIZE = "\u001D(k\u0003\x001C",
+    SET_ERROR = "\u001D(k\u0003\x001E",
+    SET_LENGTH = "\u001D(k",
+    SET_DATA = "1P0",
+    PRINT = "\u001D(k\u0003\x001Q0"
 }
-export declare enum CODE2D_FORMAT {
-    TYPE_PDF417 = "\u001BZ\0",
-    TYPE_DATAMATRIX = "\u001BZ\u0001",
-    TYPE_QR = "\u001BZ\u0002",
-    CODE2D = "\u001BZ"
+export declare enum QR_MODEL {
+    MODEL_1 = "1",
+    MODEL_2 = "2",
+    MICRO = "3"
 }
-export declare enum BITMAP_FORMAT {
-    BITMAP_S8 = "\u001B*\0",
-    BITMAP_D8 = "\u001B*\u0001",
-    BITMAP_S24 = "\u001B* ",
-    BITMAP_D24 = "\u001B*!"
-}
-export declare enum GSV0_FORMAT {
-    NORMAL = "\u001Dv0\0",
-    DOUBLE_HEIGHT = "\u001Dv0\u0001",
-    DOUBLE_WIDTH = "\u001Dv0\u0002",
-    DOUBLE_WIDTH_HEIGHT = "\u001Dv0\u0003"
+export declare enum QR_CORRECTION_LEVEL {
+    LOW = "0",
+    MEDIUM = "1",
+    QUARTILE = "2",
+    HIGH = "3"
 }

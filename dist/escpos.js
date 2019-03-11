@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var buffer_1 = require("buffer");
 var commands_1 = require("./commands");
 var mutable_buffer_1 = require("./mutable-buffer");
+var qrcode_1 = require("qrcode");
 var Escpos = /** @class */ (function () {
     function Escpos() {
         this.buffer = new mutable_buffer_1.MutableBuffer();
@@ -27,14 +28,29 @@ var Escpos = /** @class */ (function () {
         this.buffer.write(content);
         return this;
     };
+    Escpos.prototype.format = function (options) {
+        this.buffer.write(commands_1.TEXT_CMD.SET_FORMAT);
+        this.buffer.writeUInt8((+!!options.fontB << 0) +
+            (+!!options.bold << 3) +
+            (+!!options.doubleHeight << 4) +
+            (+!!options.doubleWidth << 5) +
+            (+!!options.italic << 6) +
+            (+!!options.underline << 7));
+        return this;
+    };
     Escpos.prototype.font = function (font) {
-        this.buffer.write(commands_1.TEXT_STYLE.SET_FONT);
-        this.buffer.write(font);
+        this.buffer.write(commands_1.TEXT_CMD.SET_FONT);
+        this.buffer.write(font || commands_1.FONT.A);
         return this;
     };
     Escpos.prototype.bold = function (set) {
-        this.buffer.write(commands_1.TEXT_STYLE.SET_BOLD);
-        this.buffer.writeUInt8(Number(!!set));
+        this.buffer.write(commands_1.TEXT_CMD.SET_BOLD);
+        this.buffer.writeUInt8(+!!set);
+        return this;
+    };
+    Escpos.prototype.underline = function (set, double) {
+        this.buffer.write(commands_1.TEXT_CMD.SET_UNDERLINE);
+        this.buffer.writeUInt8(set ? double ? 2 : 1 : 0);
         return this;
     };
     Escpos.prototype.margin = function (side, size) {
@@ -44,8 +60,8 @@ var Escpos = /** @class */ (function () {
     };
     Escpos.prototype.feed = function (lines) {
         if (lines === void 0) { lines = 1; }
-        lines = Math.floor(lines);
-        if (lines > 0) {
+        if (typeof lines === 'number' && lines > 0) {
+            lines = Math.floor(lines);
             this.buffer.write(new Array(lines).fill(commands_1.CMD.EOL).join(''));
         }
         return this;
@@ -57,26 +73,18 @@ var Escpos = /** @class */ (function () {
         return this;
     };
     Escpos.prototype.align = function (align) {
-        this.buffer.write(align);
+        this.buffer.write(commands_1.TEXT_CMD.SET_ALIGN);
+        this.buffer.write(align || commands_1.ALIGN.LEFT);
         return this;
     };
     Escpos.prototype.size = function (width, height) {
         if (width && height) {
             width = Math.min(Math.max(Math.floor(width), 1), 8);
             height = Math.min(Math.max(Math.floor(height), 1), 8);
+            this.buffer.write(commands_1.TEXT_CMD.SET_SIZE);
             this.buffer.writeUInt8(((width - 1) << 4) + (height - 1));
         }
         return this;
-        // if (2 >= width && 2 >= height) {
-        //   this.buffer.write(CMD.TEXT_FORMAT.TXT_NORMAL);
-        //   if (2 == width && 2 == height) {
-        //     this.buffer.write(CMD.TEXT_FORMAT.TXT_4SQUARE);
-        //   } else if (1 == width && 2 == height) {
-        //     this.buffer.write(CMD.TEXT_FORMAT.TXT_2HEIGHT);
-        //   } else if (2 == width && 1 == height) {
-        //     this.buffer.write(CMD.TEXT_FORMAT.TXT_2WIDTH);
-        //   }
-        // }
     };
     Escpos.prototype.lineSpace = function (space) {
         if (space === undefined || space < 0 || space > 255) {
@@ -107,26 +115,66 @@ var Escpos = /** @class */ (function () {
             this.buffer.writeUInt8(height);
         }
         this.buffer.write(commands_1.BARCODE.SET_FONT);
-        this.buffer.write(font || commands_1.FONT.A);
+        this.buffer.write(font || commands_1.FONT.B);
         this.buffer.write(commands_1.BARCODE.SET_HRI);
         this.buffer.write(hri || commands_1.BARCODE_HRI.OFF);
-        this.buffer.write(commands_1.BARCODE.SET_FONT);
+        this.buffer.write(commands_1.BARCODE.SET_FORMAT);
         this.buffer.write(type || commands_1.BARCODE_FORMAT.EAN13);
         code = String(code);
-        this.buffer.write(code.length);
-        this.buffer.write(buffer_1.Buffer.from(code, 'ascii'));
-        this.buffer.write('\x00');
+        if (type > '\x40') {
+            this.buffer.writeUInt8(code.length);
+            this.buffer.write(buffer_1.Buffer.from(code, 'ascii'));
+        }
+        else {
+            this.buffer.write(buffer_1.Buffer.from(code, 'ascii'));
+            this.buffer.write(commands_1.CMD.NUL);
+        }
         return this;
     };
-    // qrcode(code: string, version: number = 3, level: number = 3, size: number = 8): Escpos {
-    //   this.buffer.write(CMD.CODE2D_FORMAT.CODE2D);
-    //   this.buffer.writeUInt8(version);
-    //   this.buffer.writeUInt8(level);
-    //   this.buffer.writeUInt8(size);
-    //   this.buffer.writeUInt16LE(code.length);
-    //   this.buffer.write(code);
-    //   return this;
-    // }
+    Escpos.prototype.qrcode = function (value, model, size, correction) {
+        this.buffer.write(commands_1.CMD.LF);
+        this.buffer.write(commands_1.QR.SET_MODEL);
+        this.buffer.write(model || commands_1.QR_MODEL.MODEL_2);
+        this.buffer.write(commands_1.CMD.NUL);
+        this.buffer.write(commands_1.QR.SET_SIZE);
+        if (typeof size !== 'number' || size < 1 || size > 8) {
+            this.buffer.writeUInt8(6);
+        }
+        {
+            size = Math.floor(size);
+            this.buffer.writeUInt8(size);
+        }
+        this.buffer.write(commands_1.QR.SET_ERROR);
+        this.buffer.write(correction || commands_1.QR_CORRECTION_LEVEL.MEDIUM);
+        this.buffer.write(commands_1.QR.SET_LENGTH);
+        this.buffer.writeUInt16LE(value.length + 3);
+        this.buffer.write(commands_1.QR.SET_DATA);
+        this.buffer.write(buffer_1.Buffer.from(value, 'ascii'));
+        this.buffer.write(commands_1.QR.PRINT);
+        return this;
+    };
+    Escpos.prototype.qrimage = function (value) {
+        var qr = qrcode_1.create(value).modules;
+        var bytes = [];
+        for (var i = 0; i < qr.data.length; i += qr.size) {
+            bytes.push(qr.data.slice(i, i + qr.size).map(function (bit) { return bit ? 0xFF : 0x00; }));
+            bytes.push(qr.data.slice(i, i + qr.size).map(function (bit) { return bit ? 0xFF : 0x00; }));
+            bytes.push(qr.data.slice(i, i + qr.size).map(function (bit) { return bit ? 0xFF : 0x00; }));
+            bytes.push(qr.data.slice(i, i + qr.size).map(function (bit) { return bit ? 0xFF : 0x00; }));
+            bytes.push(qr.data.slice(i, i + qr.size).map(function (bit) { return bit ? 0xFF : 0x00; }));
+            bytes.push(qr.data.slice(i, i + qr.size).map(function (bit) { return bit ? 0xFF : 0x00; }));
+            bytes.push(qr.data.slice(i, i + qr.size).map(function (bit) { return bit ? 0xFF : 0x00; }));
+            bytes.push(qr.data.slice(i, i + qr.size).map(function (bit) { return bit ? 0xFF : 0x00; }));
+        }
+        var size = qr.size * 8;
+        this.buffer.write([
+            0x1d, 0x76, 0x30, 0x00,
+            (size >> 3) & 0xff, (((size >> 3) >> 8) & 0xff),
+            size & 0xff, ((size >> 8) & 0xff),
+            bytes,
+        ]);
+        return this;
+    };
     Escpos.prototype.pulse = function (pin, timeOn, timeOff) {
         if (pin) {
             this.buffer.write(pin);

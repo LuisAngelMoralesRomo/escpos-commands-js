@@ -13,12 +13,27 @@ export enum CMD {
   EOL = '\n',
 }
 
-export enum FEED_CONTROL_SEQUENCES {
+export enum CONTROL_CMD {
   LF = '\x0A', // Print and line feed
   FF = '\x0C', // Form feed
   CR = '\x0D', // Carriage return
   HT = '\x09', // Horizontal tab
   VT = '\x0B', // Vertical tab
+}
+
+export enum TEXT_CMD {
+  SET_FORMAT = '\x1B\x21',
+  SET_SIZE = '\x1D\x21',
+  SET_UNDERLINE = '\x1B\x2D',
+  SET_FONT = '\x1B\x4D',
+  SET_BOLD = '\x1B\x45',
+  SET_ALIGN = '\x1B\x61',
+}
+
+export enum ALIGN {
+  LEFT = '\x00',
+  CENTER = '\x01',
+  RIGHT = '\x02',
 }
 
 export enum LINE_SPACING {
@@ -33,49 +48,31 @@ export enum HARDWARE {
 }
 
 export enum CASH_DRAWER {
-  KICK_2 = '\x1B\x70\x00', // Sends a pulse to pin 2 []
-  KICK_5 = '\x1B\x70\x01', // Sends a pulse to pin 5 []
+  KICK_2 = '\x1B\x70\x00',
+  KICK_5 = '\x1B\x70\x01',
 }
 
 export enum MARGINS {
-  BOTTOM = '\x1B\x4F', // Fix bottom size
-  LEFT = '\x1B\x6C', // Fix left size
-  RIGHT = '\x1B\x51', // Fix right size
+  BOTTOM = '\x1B\x4F',
+  LEFT = '\x1B\x6C',
+  RIGHT = '\x1B\x51',
 }
 
 
 export enum PAPER_CUT {
-  FULL = '\x1D\x56\x00', // Full cut paper
-  PARTIAL = '\x1D\x56\x01', // Partial cut paper
-  A = '\x1D\x56\x41', // Partial cut paper
-  B = '\x1D\x56\x42', // Partial cut paper
-}
-
-export enum TEXT_SIZE {
-  NORMAL = '\x1B\x21\x00',
-  DOUBLE_HEIGHT = '\x1B\x21\x10',
-  DOUBLE_WIDTH = '\x1B\x21\x20',
-  DOUBLE_WIDTH_HEIGHT = '\x1B\x21\x30',
-}
-
-export enum TEXT_ALIGN {
-  LEFT = '\x1B\x61\x00',
-  CENTER = '\x1B\x61\x01',
-  RIGHT = '\x1B\x61\x02',
+  FULL = '\x1D\x56\x00',
+  PARTIAL = '\x1D\x56\x01',
+  FULL_FEED = '\x1D\x56\x41\x00',
+  PARTIAL_FEED = '\x1D\x56\x42\x00',
+  FULL_MOVE = '\x1D\x56\x61\x00',
+  PARTIAL_MOVE = '\x1D\x56\x62\x00',
+  FULL_RETURN = '\x1D\x56\x67\x00',
+  PARTIAL_RETURN = '\x1D\x56\x68\x00',
 }
 
 export enum TEXT_STYLE {
-  SET_FONT = '\x1B\x4D',
-  SET_BOLD = '\x1B\x45',
-  SET_UNDERLINE = '\x1B\x2D',
-
-  UNDERL_OFF = '\x1B\x2D\x00', // Underline font OFF
-  UNDERL_ON = '\x1B\x2D\x01', // Underline font 1-dot ON
-  UNDERL2_ON = '\x1B\x2D\x02', // Underline font 2-dot ON
-  BOLD_OFF = '\x1B\x45\x00', // Bold font OFF
-  BOLD_ON = '\x1B\x45\x01', // Bold font ON
-  ITALIC_OFF = '\x1B\x35', // Italic font ON
-  ITALIC_ON = '\x1B\x34', // Italic font ON
+  ITALIC_OFF = '\x1B\x35',
+  ITALIC_ON = '\x1B\x34',
 }
 
 export enum BARCODE {
@@ -94,8 +91,21 @@ export enum BARCODE_FORMAT {
   CODE39 = '\x04',
   ITF = '\x05',
   NW7 = '\x06',
+
+  B_UPC_A = '\x41',
+  B_UPC_E = '\x42',
+  B_EAN13 = '\x43',
+  B_EAN8 = '\x44',
+  B_CODE39 = '\x45',
+  B_ITF = '\x46',
+  CODABAR = '\x47',
   CODE93 = '\x48',
   CODE128 = '\x49',
+  GS1_128 = '\x4A',
+  GS1_DATABAR_OMNIDIRECTIONAL = '\x4B',
+  GS1_DATABAR_TRUNCATED = '\x4C',
+  GS1_DATABAR_LIMITED = '\x4D',
+  GS1_DATABAR_EXPANDED = '\x4E',
 }
 
 export enum BARCODE_HRI {
@@ -115,31 +125,25 @@ export enum FONT {
   B_SPECIAL = '\x62',
 }
 
-
-export enum IMAGE_FORMAT {
-  S_RASTER_N = '\x1D\x76\x30\x00', // Set raster image normal size
-  S_RASTER_2W = '\x1D\x76\x30\x01', // Set raster image double width
-  S_RASTER_2H = '\x1D\x76\x30\x02', // Set raster image double height
-  S_RASTER_Q = '\x1D\x76\x30\x03', // Set raster image quadruple
+export enum QR {
+  SET_MODEL = '\x1D\x28\x6B\x04\x00\x31\x41',
+  SET_SIZE = '\x1D\x28\x6B\x03\x00\x31\x43',
+  SET_ERROR = '\x1D\x28\x6B\x03\x00\x31\x45',
+  SET_LENGTH = '\x1d\x28\x6b',
+  SET_DATA = '\x31\x50\x30',
+  PRINT = '\x1d\x28\x6b\x03\x00\x31\x51\x30'
 }
 
-export enum CODE2D_FORMAT {
-  TYPE_PDF417 = '\x1B\x5A\x00',
-  TYPE_DATAMATRIX = '\x1B\x5A\x01',
-  TYPE_QR = '\x1B\x5A\x02',
-  CODE2D = '\x1B\x5A',
+export enum QR_MODEL {
+  MODEL_1 = '\x31',
+  MODEL_2 = '\x32',
+  MICRO = '\x33',
 }
 
-export enum BITMAP_FORMAT {
-  BITMAP_S8 = '\x1B\x2A\x00',
-  BITMAP_D8 = '\x1B\x2A\x01',
-  BITMAP_S24 = '\x1B\x2A\x20',
-  BITMAP_D24 = '\x1B\x2A\x21'
+export enum QR_CORRECTION_LEVEL {
+  LOW = '\x30',
+  MEDIUM = '\x31',
+  QUARTILE = '\x32',
+  HIGH = '\x33',
 }
 
-export enum GSV0_FORMAT {
-  NORMAL = '\x1D\x76\x30\x00',
-  DOUBLE_HEIGHT = '\x1D\x76\x30\x01',
-  DOUBLE_WIDTH = '\x1D\x76\x30\x02',
-  DOUBLE_WIDTH_HEIGHT = '\x1D\x76\x30\x03'
-}

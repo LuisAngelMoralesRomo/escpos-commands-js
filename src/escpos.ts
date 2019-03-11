@@ -1,6 +1,7 @@
 import { Buffer } from 'buffer';
-import { BARCODE, BARCODE_FORMAT, BARCODE_HRI, CMD, FEED_CONTROL_SEQUENCES, FONT, HARDWARE, LINE_SPACING, MARGINS, TEXT_ALIGN, TEXT_STYLE, PAPER_CUT, CASH_DRAWER } from './commands';
+import { ALIGN, BARCODE, BARCODE_FORMAT, BARCODE_HRI, CASH_DRAWER, CMD, CONTROL_CMD, FONT, HARDWARE, LINE_SPACING, MARGINS, PAPER_CUT, TEXT_CMD, QR, QR_MODEL, QR_CORRECTION_LEVEL } from './commands';
 import { MutableBuffer } from './mutable-buffer';
+import { create } from 'qrcode';
 
 export class Escpos {
 
@@ -22,7 +23,7 @@ export class Escpos {
     return this;
   }
 
-  public control(ctrl: FEED_CONTROL_SEQUENCES): Escpos {
+  public control(ctrl: CONTROL_CMD): Escpos {
     if (ctrl) {
       this.buffer.write(ctrl);
     }
@@ -34,15 +35,41 @@ export class Escpos {
     return this;
   }
 
+  public format(options: {
+    fontB?: boolean,
+    bold?: boolean,
+    doubleHeight?: boolean,
+    doubleWidth?: boolean,
+    italic?: boolean,
+    underline?: boolean
+  }): Escpos {
+    this.buffer.write(TEXT_CMD.SET_FORMAT);
+    this.buffer.writeUInt8(
+      (+!!options.fontB << 0) +
+      (+!!options.bold << 3) +
+      (+!!options.doubleHeight << 4) +
+      (+!!options.doubleWidth << 5) +
+      (+!!options.italic << 6) +
+      (+!!options.underline << 7)
+    );
+    return this;
+  }
+
   public font(font: FONT): Escpos {
-    this.buffer.write(TEXT_STYLE.SET_FONT);
-    this.buffer.write(font);
+    this.buffer.write(TEXT_CMD.SET_FONT);
+    this.buffer.write(font || FONT.A);
     return this;
   }
 
   public bold(set: boolean): Escpos {
-    this.buffer.write(TEXT_STYLE.SET_BOLD);
-    this.buffer.writeUInt8(Number(!!set));
+    this.buffer.write(TEXT_CMD.SET_BOLD);
+    this.buffer.writeUInt8(+!!set);
+    return this;
+  }
+
+  public underline(set: boolean, double?: boolean): Escpos {
+    this.buffer.write(TEXT_CMD.SET_UNDERLINE);
+    this.buffer.writeUInt8(set ? double ? 2 : 1 : 0);
     return this;
   }
 
@@ -53,8 +80,8 @@ export class Escpos {
   }
 
   public feed(lines: number = 1): Escpos {
-    lines = Math.floor(lines);
-    if (lines > 0) {
+    if (typeof lines === 'number' && lines > 0) {
+      lines = Math.floor(lines);
       this.buffer.write(new Array(lines).fill(CMD.EOL).join(''));
     }
     return this;
@@ -67,8 +94,9 @@ export class Escpos {
     return this;
   }
 
-  public align(align: TEXT_ALIGN): Escpos {
-    this.buffer.write(align);
+  public align(align: ALIGN): Escpos {
+    this.buffer.write(TEXT_CMD.SET_ALIGN);
+    this.buffer.write(align || ALIGN.LEFT);
     return this;
   }
 
@@ -76,19 +104,10 @@ export class Escpos {
     if (width && height) {
       width = Math.min(Math.max(Math.floor(width), 1), 8);
       height = Math.min(Math.max(Math.floor(height), 1), 8);
-      this.buffer.writeUInt8(((width - 1) << 4) + (height - 1)); 
+      this.buffer.write(TEXT_CMD.SET_SIZE);
+      this.buffer.writeUInt8(((width - 1) << 4) + (height - 1));
     }
     return this;
-    // if (2 >= width && 2 >= height) {
-    //   this.buffer.write(CMD.TEXT_FORMAT.TXT_NORMAL);
-    //   if (2 == width && 2 == height) {
-    //     this.buffer.write(CMD.TEXT_FORMAT.TXT_4SQUARE);
-    //   } else if (1 == width && 2 == height) {
-    //     this.buffer.write(CMD.TEXT_FORMAT.TXT_2HEIGHT);
-    //   } else if (2 == width && 1 == height) {
-    //     this.buffer.write(CMD.TEXT_FORMAT.TXT_2WIDTH);
-    //   }
-    // }
   }
 
   public lineSpace(space?: number): Escpos {
@@ -128,31 +147,81 @@ export class Escpos {
     }
 
     this.buffer.write(BARCODE.SET_FONT);
-    this.buffer.write(font || FONT.A);
+    this.buffer.write(font || FONT.B);
 
     this.buffer.write(BARCODE.SET_HRI);
     this.buffer.write(hri || BARCODE_HRI.OFF);
 
-    this.buffer.write(BARCODE.SET_FONT);
+    this.buffer.write(BARCODE.SET_FORMAT);
     this.buffer.write(type || BARCODE_FORMAT.EAN13);
 
     code = String(code);
-    this.buffer.write(code.length);
-    this.buffer.write(Buffer.from(code, 'ascii'));
-    this.buffer.write('\x00');
+    if (type > '\x40') {
+      this.buffer.writeUInt8(code.length);
+      this.buffer.write(Buffer.from(code, 'ascii'));
+    } else {
+      this.buffer.write(Buffer.from(code, 'ascii'));
+      this.buffer.write(CMD.NUL);
+    }
 
     return this;
   }
 
-  // qrcode(code: string, version: number = 3, level: number = 3, size: number = 8): Escpos {
-  //   this.buffer.write(CMD.CODE2D_FORMAT.CODE2D);
-  //   this.buffer.writeUInt8(version);
-  //   this.buffer.writeUInt8(level);
-  //   this.buffer.writeUInt8(size);
-  //   this.buffer.writeUInt16LE(code.length);
-  //   this.buffer.write(code);
-  //   return this;
-  // }
+  public qrcode(value: string, model?: QR_MODEL, size?: number, correction?: QR_CORRECTION_LEVEL): Escpos {
+    this.buffer.write(CMD.LF);
+
+    this.buffer.write(QR.SET_MODEL);
+    this.buffer.write(model || QR_MODEL.MODEL_2);
+    this.buffer.write(CMD.NUL);
+
+    this.buffer.write(QR.SET_SIZE);
+    if (typeof size !== 'number' || size < 1 || size > 8) {
+      this.buffer.writeUInt8(6);
+    } {
+      size = Math.floor(size);
+      this.buffer.writeUInt8(size);
+    }
+
+    this.buffer.write(QR.SET_ERROR);
+    this.buffer.write(correction || QR_CORRECTION_LEVEL.MEDIUM);
+
+    this.buffer.write(QR.SET_LENGTH);
+    this.buffer.writeUInt16LE(value.length + 3);
+
+    this.buffer.write(QR.SET_DATA);
+    this.buffer.write(Buffer.from(value, 'ascii'));
+
+    this.buffer.write(QR.PRINT);
+
+    return this;
+  }
+
+  public qrimage(value: string): Escpos {
+    const qr = create(value).modules;
+    
+    const bytes: any[] = []
+
+    for (let i = 0; i < qr.data.length; i += qr.size) {
+      bytes.push(qr.data.slice(i, i + qr.size).map(bit => bit ? 0xFF : 0x00));
+      bytes.push(qr.data.slice(i, i + qr.size).map(bit => bit ? 0xFF : 0x00));
+      bytes.push(qr.data.slice(i, i + qr.size).map(bit => bit ? 0xFF : 0x00));
+      bytes.push(qr.data.slice(i, i + qr.size).map(bit => bit ? 0xFF : 0x00));
+      bytes.push(qr.data.slice(i, i + qr.size).map(bit => bit ? 0xFF : 0x00));
+      bytes.push(qr.data.slice(i, i + qr.size).map(bit => bit ? 0xFF : 0x00));
+      bytes.push(qr.data.slice(i, i + qr.size).map(bit => bit ? 0xFF : 0x00));
+      bytes.push(qr.data.slice(i, i + qr.size).map(bit => bit ? 0xFF : 0x00));
+    }
+
+    const size: number = qr.size * 8 
+
+    this.buffer.write([
+      0x1d, 0x76, 0x30, 0x00,
+      (size >> 3) & 0xff, (((size >> 3) >> 8) & 0xff),
+      size & 0xff, ((size >> 8) & 0xff),
+      bytes,
+    ]);
+    return this;
+  }
 
   public pulse(pin: CASH_DRAWER, timeOn?: number, timeOff?: number): Escpos {
     if (pin) {
@@ -163,7 +232,7 @@ export class Escpos {
     return this;
   }
 
-  public flush() {
+  public flush(): Buffer {
     return this.buffer.flush();
   }
 

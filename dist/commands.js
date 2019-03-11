@@ -15,14 +15,29 @@ var CMD;
     CMD["NUL"] = "\0";
     CMD["EOL"] = "\n";
 })(CMD = exports.CMD || (exports.CMD = {}));
-var FEED_CONTROL_SEQUENCES;
-(function (FEED_CONTROL_SEQUENCES) {
-    FEED_CONTROL_SEQUENCES["LF"] = "\n";
-    FEED_CONTROL_SEQUENCES["FF"] = "\f";
-    FEED_CONTROL_SEQUENCES["CR"] = "\r";
-    FEED_CONTROL_SEQUENCES["HT"] = "\t";
-    FEED_CONTROL_SEQUENCES["VT"] = "\v";
-})(FEED_CONTROL_SEQUENCES = exports.FEED_CONTROL_SEQUENCES || (exports.FEED_CONTROL_SEQUENCES = {}));
+var CONTROL_CMD;
+(function (CONTROL_CMD) {
+    CONTROL_CMD["LF"] = "\n";
+    CONTROL_CMD["FF"] = "\f";
+    CONTROL_CMD["CR"] = "\r";
+    CONTROL_CMD["HT"] = "\t";
+    CONTROL_CMD["VT"] = "\v";
+})(CONTROL_CMD = exports.CONTROL_CMD || (exports.CONTROL_CMD = {}));
+var TEXT_CMD;
+(function (TEXT_CMD) {
+    TEXT_CMD["SET_FORMAT"] = "\u001B!";
+    TEXT_CMD["SET_SIZE"] = "\u001D!";
+    TEXT_CMD["SET_UNDERLINE"] = "\u001B-";
+    TEXT_CMD["SET_FONT"] = "\u001BM";
+    TEXT_CMD["SET_BOLD"] = "\u001BE";
+    TEXT_CMD["SET_ALIGN"] = "\u001Ba";
+})(TEXT_CMD = exports.TEXT_CMD || (exports.TEXT_CMD = {}));
+var ALIGN;
+(function (ALIGN) {
+    ALIGN["LEFT"] = "\0";
+    ALIGN["CENTER"] = "\u0001";
+    ALIGN["RIGHT"] = "\u0002";
+})(ALIGN = exports.ALIGN || (exports.ALIGN = {}));
 var LINE_SPACING;
 (function (LINE_SPACING) {
     LINE_SPACING["DEFAULT"] = "\u001B2";
@@ -49,32 +64,15 @@ var PAPER_CUT;
 (function (PAPER_CUT) {
     PAPER_CUT["FULL"] = "\u001DV\0";
     PAPER_CUT["PARTIAL"] = "\u001DV\u0001";
-    PAPER_CUT["A"] = "\u001DVA";
-    PAPER_CUT["B"] = "\u001DVB";
+    PAPER_CUT["FULL_FEED"] = "\u001DVA\0";
+    PAPER_CUT["PARTIAL_FEED"] = "\u001DVB\0";
+    PAPER_CUT["FULL_MOVE"] = "\u001DVa\0";
+    PAPER_CUT["PARTIAL_MOVE"] = "\u001DVb\0";
+    PAPER_CUT["FULL_RETURN"] = "\u001DVg\0";
+    PAPER_CUT["PARTIAL_RETURN"] = "\u001DVh\0";
 })(PAPER_CUT = exports.PAPER_CUT || (exports.PAPER_CUT = {}));
-var TEXT_SIZE;
-(function (TEXT_SIZE) {
-    TEXT_SIZE["NORMAL"] = "\u001B!\0";
-    TEXT_SIZE["DOUBLE_HEIGHT"] = "\u001B!\u0010";
-    TEXT_SIZE["DOUBLE_WIDTH"] = "\u001B! ";
-    TEXT_SIZE["DOUBLE_WIDTH_HEIGHT"] = "\u001B!0";
-})(TEXT_SIZE = exports.TEXT_SIZE || (exports.TEXT_SIZE = {}));
-var TEXT_ALIGN;
-(function (TEXT_ALIGN) {
-    TEXT_ALIGN["LEFT"] = "\u001Ba\0";
-    TEXT_ALIGN["CENTER"] = "\u001Ba\u0001";
-    TEXT_ALIGN["RIGHT"] = "\u001Ba\u0002";
-})(TEXT_ALIGN = exports.TEXT_ALIGN || (exports.TEXT_ALIGN = {}));
 var TEXT_STYLE;
 (function (TEXT_STYLE) {
-    TEXT_STYLE["SET_FONT"] = "\u001BM";
-    TEXT_STYLE["SET_BOLD"] = "\u001BE";
-    TEXT_STYLE["SET_UNDERLINE"] = "\u001B-";
-    TEXT_STYLE["UNDERL_OFF"] = "\u001B-\0";
-    TEXT_STYLE["UNDERL_ON"] = "\u001B-\u0001";
-    TEXT_STYLE["UNDERL2_ON"] = "\u001B-\u0002";
-    TEXT_STYLE["BOLD_OFF"] = "\u001BE\0";
-    TEXT_STYLE["BOLD_ON"] = "\u001BE\u0001";
     TEXT_STYLE["ITALIC_OFF"] = "\u001B5";
     TEXT_STYLE["ITALIC_ON"] = "\u001B4";
 })(TEXT_STYLE = exports.TEXT_STYLE || (exports.TEXT_STYLE = {}));
@@ -95,8 +93,20 @@ var BARCODE_FORMAT;
     BARCODE_FORMAT["CODE39"] = "\u0004";
     BARCODE_FORMAT["ITF"] = "\u0005";
     BARCODE_FORMAT["NW7"] = "\u0006";
+    BARCODE_FORMAT["B_UPC_A"] = "A";
+    BARCODE_FORMAT["B_UPC_E"] = "B";
+    BARCODE_FORMAT["B_EAN13"] = "C";
+    BARCODE_FORMAT["B_EAN8"] = "D";
+    BARCODE_FORMAT["B_CODE39"] = "E";
+    BARCODE_FORMAT["B_ITF"] = "F";
+    BARCODE_FORMAT["CODABAR"] = "G";
     BARCODE_FORMAT["CODE93"] = "H";
     BARCODE_FORMAT["CODE128"] = "I";
+    BARCODE_FORMAT["GS1_128"] = "J";
+    BARCODE_FORMAT["GS1_DATABAR_OMNIDIRECTIONAL"] = "K";
+    BARCODE_FORMAT["GS1_DATABAR_TRUNCATED"] = "L";
+    BARCODE_FORMAT["GS1_DATABAR_LIMITED"] = "M";
+    BARCODE_FORMAT["GS1_DATABAR_EXPANDED"] = "N";
 })(BARCODE_FORMAT = exports.BARCODE_FORMAT || (exports.BARCODE_FORMAT = {}));
 var BARCODE_HRI;
 (function (BARCODE_HRI) {
@@ -115,31 +125,25 @@ var FONT;
     FONT["A_SPECIAL"] = "a";
     FONT["B_SPECIAL"] = "b";
 })(FONT = exports.FONT || (exports.FONT = {}));
-var IMAGE_FORMAT;
-(function (IMAGE_FORMAT) {
-    IMAGE_FORMAT["S_RASTER_N"] = "\u001Dv0\0";
-    IMAGE_FORMAT["S_RASTER_2W"] = "\u001Dv0\u0001";
-    IMAGE_FORMAT["S_RASTER_2H"] = "\u001Dv0\u0002";
-    IMAGE_FORMAT["S_RASTER_Q"] = "\u001Dv0\u0003";
-})(IMAGE_FORMAT = exports.IMAGE_FORMAT || (exports.IMAGE_FORMAT = {}));
-var CODE2D_FORMAT;
-(function (CODE2D_FORMAT) {
-    CODE2D_FORMAT["TYPE_PDF417"] = "\u001BZ\0";
-    CODE2D_FORMAT["TYPE_DATAMATRIX"] = "\u001BZ\u0001";
-    CODE2D_FORMAT["TYPE_QR"] = "\u001BZ\u0002";
-    CODE2D_FORMAT["CODE2D"] = "\u001BZ";
-})(CODE2D_FORMAT = exports.CODE2D_FORMAT || (exports.CODE2D_FORMAT = {}));
-var BITMAP_FORMAT;
-(function (BITMAP_FORMAT) {
-    BITMAP_FORMAT["BITMAP_S8"] = "\u001B*\0";
-    BITMAP_FORMAT["BITMAP_D8"] = "\u001B*\u0001";
-    BITMAP_FORMAT["BITMAP_S24"] = "\u001B* ";
-    BITMAP_FORMAT["BITMAP_D24"] = "\u001B*!";
-})(BITMAP_FORMAT = exports.BITMAP_FORMAT || (exports.BITMAP_FORMAT = {}));
-var GSV0_FORMAT;
-(function (GSV0_FORMAT) {
-    GSV0_FORMAT["NORMAL"] = "\u001Dv0\0";
-    GSV0_FORMAT["DOUBLE_HEIGHT"] = "\u001Dv0\u0001";
-    GSV0_FORMAT["DOUBLE_WIDTH"] = "\u001Dv0\u0002";
-    GSV0_FORMAT["DOUBLE_WIDTH_HEIGHT"] = "\u001Dv0\u0003";
-})(GSV0_FORMAT = exports.GSV0_FORMAT || (exports.GSV0_FORMAT = {}));
+var QR;
+(function (QR) {
+    QR["SET_MODEL"] = "\u001D(k\u0004\x001A";
+    QR["SET_SIZE"] = "\u001D(k\u0003\x001C";
+    QR["SET_ERROR"] = "\u001D(k\u0003\x001E";
+    QR["SET_LENGTH"] = "\u001D(k";
+    QR["SET_DATA"] = "1P0";
+    QR["PRINT"] = "\u001D(k\u0003\x001Q0";
+})(QR = exports.QR || (exports.QR = {}));
+var QR_MODEL;
+(function (QR_MODEL) {
+    QR_MODEL["MODEL_1"] = "1";
+    QR_MODEL["MODEL_2"] = "2";
+    QR_MODEL["MICRO"] = "3";
+})(QR_MODEL = exports.QR_MODEL || (exports.QR_MODEL = {}));
+var QR_CORRECTION_LEVEL;
+(function (QR_CORRECTION_LEVEL) {
+    QR_CORRECTION_LEVEL["LOW"] = "0";
+    QR_CORRECTION_LEVEL["MEDIUM"] = "1";
+    QR_CORRECTION_LEVEL["QUARTILE"] = "2";
+    QR_CORRECTION_LEVEL["HIGH"] = "3";
+})(QR_CORRECTION_LEVEL = exports.QR_CORRECTION_LEVEL || (exports.QR_CORRECTION_LEVEL = {}));
