@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var buffer_1 = require("buffer");
 var commands_1 = require("./commands");
-var mutable_buffer_1 = require("./mutable-buffer");
+var mutable_buffer_1 = require("mutable-buffer");
 var qrcode_1 = require("qrcode");
 var Escpos = /** @class */ (function () {
     function Escpos() {

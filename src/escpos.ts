@@ -1,6 +1,6 @@
 import { Buffer } from 'buffer';
 import { ALIGN, BARCODE, BARCODE_FORMAT, BARCODE_HRI, CASH_DRAWER, CMD, CONTROL_CMD, FONT, HARDWARE, LINE_SPACING, MARGINS, PAPER_CUT, TEXT_CMD, QR, QR_MODEL, QR_CORRECTION_LEVEL } from './commands';
-import { MutableBuffer } from './mutable-buffer';
+import { MutableBuffer } from 'mutable-buffer';
 import { create } from 'qrcode';
 
 export class Escpos {
