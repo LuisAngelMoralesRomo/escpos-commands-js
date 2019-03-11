@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var buffer_1 = require("buffer");
 var commands_1 = require("./commands");
 var mutable_buffer_1 = require("mutable-buffer");
-var qrcode_1 = require("qrcode");
+// import { create } from 'qrcode';
 var Escpos = /** @class */ (function () {
     function Escpos() {
         this.buffer = new mutable_buffer_1.MutableBuffer();
@@ -153,28 +153,28 @@ var Escpos = /** @class */ (function () {
         this.buffer.write(commands_1.QR.PRINT);
         return this;
     };
-    Escpos.prototype.qrimage = function (value) {
-        var qr = qrcode_1.create(value).modules;
-        var bytes = [];
-        for (var i = 0; i < qr.data.length; i += qr.size) {
-            bytes.push(qr.data.slice(i, i + qr.size).map(function (bit) { return bit ? 0xFF : 0x00; }));
-            bytes.push(qr.data.slice(i, i + qr.size).map(function (bit) { return bit ? 0xFF : 0x00; }));
-            bytes.push(qr.data.slice(i, i + qr.size).map(function (bit) { return bit ? 0xFF : 0x00; }));
-            bytes.push(qr.data.slice(i, i + qr.size).map(function (bit) { return bit ? 0xFF : 0x00; }));
-            bytes.push(qr.data.slice(i, i + qr.size).map(function (bit) { return bit ? 0xFF : 0x00; }));
-            bytes.push(qr.data.slice(i, i + qr.size).map(function (bit) { return bit ? 0xFF : 0x00; }));
-            bytes.push(qr.data.slice(i, i + qr.size).map(function (bit) { return bit ? 0xFF : 0x00; }));
-            bytes.push(qr.data.slice(i, i + qr.size).map(function (bit) { return bit ? 0xFF : 0x00; }));
-        }
-        var size = qr.size * 8;
-        this.buffer.write([
-            0x1d, 0x76, 0x30, 0x00,
-            (size >> 3) & 0xff, (((size >> 3) >> 8) & 0xff),
-            size & 0xff, ((size >> 8) & 0xff),
-            bytes,
-        ]);
-        return this;
-    };
+    // public qrimage(value: string): Escpos {
+    //   const qr = create(value).modules;
+    //   const bytes: any[] = []
+    //   for (let i = 0; i < qr.data.length; i += qr.size) {
+    //     bytes.push(qr.data.slice(i, i + qr.size).map(bit => bit ? 0xFF : 0x00));
+    //     bytes.push(qr.data.slice(i, i + qr.size).map(bit => bit ? 0xFF : 0x00));
+    //     bytes.push(qr.data.slice(i, i + qr.size).map(bit => bit ? 0xFF : 0x00));
+    //     bytes.push(qr.data.slice(i, i + qr.size).map(bit => bit ? 0xFF : 0x00));
+    //     bytes.push(qr.data.slice(i, i + qr.size).map(bit => bit ? 0xFF : 0x00));
+    //     bytes.push(qr.data.slice(i, i + qr.size).map(bit => bit ? 0xFF : 0x00));
+    //     bytes.push(qr.data.slice(i, i + qr.size).map(bit => bit ? 0xFF : 0x00));
+    //     bytes.push(qr.data.slice(i, i + qr.size).map(bit => bit ? 0xFF : 0x00));
+    //   }
+    //   const size: number = qr.size * 8 
+    //   this.buffer.write([
+    //     0x1d, 0x76, 0x30, 0x00,
+    //     (size >> 3) & 0xff, (((size >> 3) >> 8) & 0xff),
+    //     size & 0xff, ((size >> 8) & 0xff),
+    //     bytes,
+    //   ]);
+    //   return this;
+    // }
     Escpos.prototype.pulse = function (pin, timeOn, timeOff) {
         if (pin) {
             this.buffer.write(pin);

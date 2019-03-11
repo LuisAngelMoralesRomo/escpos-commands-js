@@ -5,8 +5,7 @@
   "main": "dist/escpos.js",
   "license": "MIT",
   "dependencies": {
-    "mutable-buffer": "git+https://github.com/LuisAngelMoralesRomo/mutable-buffer.git",
-    "qrcode": "^1.3.3"
+    "mutable-buffer": "git+https://github.com/LuisAngelMoralesRomo/mutable-buffer.git"
   },
   "devDependencies": {
     "typescript": "^3.3.3333"

@@ -26,7 +26,6 @@ export declare class Escpos {
     lineSpace(space?: number): Escpos;
     barcode(code: string | number, type?: BARCODE_FORMAT, width?: number, height?: number, hri?: BARCODE_HRI, font?: FONT): Escpos;
     qrcode(value: string, model?: QR_MODEL, size?: number, correction?: QR_CORRECTION_LEVEL): Escpos;
-    qrimage(value: string): Escpos;
     pulse(pin: CASH_DRAWER, timeOn?: number, timeOff?: number): Escpos;
     flush(): Buffer;
 }
