@@ -232,8 +232,12 @@ export class Escpos {
     return this;
   }
 
-  public flush(): Buffer {
+  public getBuffer(): Buffer {
     return this.buffer.flush();
+  }
+
+  public getArray(): number[] {
+    return [...this.buffer.flush()];
   }
 
 };
