@@ -1,7 +1,8 @@
 import { Buffer } from 'buffer';
 import { ALIGN, BARCODE, BARCODE_FORMAT, BARCODE_HRI, CASH_DRAWER, CMD, CONTROL_CMD, FONT, HARDWARE, LINE_SPACING, MARGINS, PAPER_CUT, TEXT_CMD, QR, QR_MODEL, QR_CORRECTION_LEVEL } from './commands';
 import { MutableBuffer } from 'mutable-buffer';
-// import { create } from 'qrcode';
+
+export * from './commands';
 
 export class Escpos {
 
@@ -32,6 +33,12 @@ export class Escpos {
 
   public text(content: string): Escpos {
     this.buffer.write(content);
+    return this;
+  }
+
+  public line(content: string): Escpos {
+    this.buffer.write(content);
+    this.buffer.write(CONTROL_CMD.LF);
     return this;
   }
 
@@ -177,7 +184,7 @@ export class Escpos {
     this.buffer.write(QR.SET_SIZE);
     if (typeof size !== 'number' || size < 1 || size > 8) {
       this.buffer.writeUInt8(6);
-    } {
+    } else {
       size = Math.floor(size);
       this.buffer.writeUInt8(size);
     }
@@ -196,32 +203,6 @@ export class Escpos {
     return this;
   }
 
-  // public qrimage(value: string): Escpos {
-  //   const qr = create(value).modules;
-    
-  //   const bytes: any[] = []
-
-  //   for (let i = 0; i < qr.data.length; i += qr.size) {
-  //     bytes.push(qr.data.slice(i, i + qr.size).map(bit => bit ? 0xFF : 0x00));
-  //     bytes.push(qr.data.slice(i, i + qr.size).map(bit => bit ? 0xFF : 0x00));
-  //     bytes.push(qr.data.slice(i, i + qr.size).map(bit => bit ? 0xFF : 0x00));
-  //     bytes.push(qr.data.slice(i, i + qr.size).map(bit => bit ? 0xFF : 0x00));
-  //     bytes.push(qr.data.slice(i, i + qr.size).map(bit => bit ? 0xFF : 0x00));
-  //     bytes.push(qr.data.slice(i, i + qr.size).map(bit => bit ? 0xFF : 0x00));
-  //     bytes.push(qr.data.slice(i, i + qr.size).map(bit => bit ? 0xFF : 0x00));
-  //     bytes.push(qr.data.slice(i, i + qr.size).map(bit => bit ? 0xFF : 0x00));
-  //   }
-
-  //   const size: number = qr.size * 8 
-
-  //   this.buffer.write([
-  //     0x1d, 0x76, 0x30, 0x00,
-  //     (size >> 3) & 0xff, (((size >> 3) >> 8) & 0xff),
-  //     size & 0xff, ((size >> 8) & 0xff),
-  //     bytes,
-  //   ]);
-  //   return this;
-  // }
 
   public pulse(pin: CASH_DRAWER, timeOn?: number, timeOff?: number): Escpos {
     if (pin) {

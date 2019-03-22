@@ -19,11 +19,14 @@ var __spread = (this && this.__spread) || function () {
     for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
     return ar;
 };
+function __export(m) {
+    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
+}
 Object.defineProperty(exports, "__esModule", { value: true });
 var buffer_1 = require("buffer");
 var commands_1 = require("./commands");
 var mutable_buffer_1 = require("mutable-buffer");
-// import { create } from 'qrcode';
+__export(require("./commands"));
 var Escpos = /** @class */ (function () {
     function Escpos() {
         this.buffer = new mutable_buffer_1.MutableBuffer();
@@ -46,6 +49,11 @@ var Escpos = /** @class */ (function () {
     };
     Escpos.prototype.text = function (content) {
         this.buffer.write(content);
+        return this;
+    };
+    Escpos.prototype.line = function (content) {
+        this.buffer.write(content);
+        this.buffer.write(commands_1.CONTROL_CMD.LF);
         return this;
     };
     Escpos.prototype.format = function (options) {
@@ -160,7 +168,7 @@ var Escpos = /** @class */ (function () {
         if (typeof size !== 'number' || size < 1 || size > 8) {
             this.buffer.writeUInt8(6);
         }
-        {
+        else {
             size = Math.floor(size);
             this.buffer.writeUInt8(size);
         }
@@ -173,28 +181,6 @@ var Escpos = /** @class */ (function () {
         this.buffer.write(commands_1.QR.PRINT);
         return this;
     };
-    // public qrimage(value: string): Escpos {
-    //   const qr = create(value).modules;
-    //   const bytes: any[] = []
-    //   for (let i = 0; i < qr.data.length; i += qr.size) {
-    //     bytes.push(qr.data.slice(i, i + qr.size).map(bit => bit ? 0xFF : 0x00));
-    //     bytes.push(qr.data.slice(i, i + qr.size).map(bit => bit ? 0xFF : 0x00));
-    //     bytes.push(qr.data.slice(i, i + qr.size).map(bit => bit ? 0xFF : 0x00));
-    //     bytes.push(qr.data.slice(i, i + qr.size).map(bit => bit ? 0xFF : 0x00));
-    //     bytes.push(qr.data.slice(i, i + qr.size).map(bit => bit ? 0xFF : 0x00));
-    //     bytes.push(qr.data.slice(i, i + qr.size).map(bit => bit ? 0xFF : 0x00));
-    //     bytes.push(qr.data.slice(i, i + qr.size).map(bit => bit ? 0xFF : 0x00));
-    //     bytes.push(qr.data.slice(i, i + qr.size).map(bit => bit ? 0xFF : 0x00));
-    //   }
-    //   const size: number = qr.size * 8 
-    //   this.buffer.write([
-    //     0x1d, 0x76, 0x30, 0x00,
-    //     (size >> 3) & 0xff, (((size >> 3) >> 8) & 0xff),
-    //     size & 0xff, ((size >> 8) & 0xff),
-    //     bytes,
-    //   ]);
-    //   return this;
-    // }
     Escpos.prototype.pulse = function (pin, timeOn, timeOff) {
         if (pin) {
             this.buffer.write(pin);

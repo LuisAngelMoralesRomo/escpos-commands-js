@@ -1,5 +1,6 @@
 import { Buffer } from 'buffer';
 import { ALIGN, BARCODE_FORMAT, BARCODE_HRI, CASH_DRAWER, CONTROL_CMD, FONT, HARDWARE, MARGINS, PAPER_CUT, QR_MODEL, QR_CORRECTION_LEVEL } from './commands';
+export * from './commands';
 export declare class Escpos {
     private buffer;
     constructor();
@@ -7,6 +8,7 @@ export declare class Escpos {
     hardware(cmd: HARDWARE): Escpos;
     control(ctrl: CONTROL_CMD): Escpos;
     text(content: string): Escpos;
+    line(content: string): Escpos;
     format(options: {
         fontB?: boolean;
         bold?: boolean;
